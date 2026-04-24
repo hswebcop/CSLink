@@ -2,166 +2,119 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>社群連結管理系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input, select, button { font-size: 16px !important; }
+        .system-title { letter-spacing: 0.05em; }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div id="login-section" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded shadow-lg w-96">
-            <h2 class="text-2xl font-bold mb-6 text-center">系統登入</h2>
-            <input type="text" id="username" placeholder="帳號" class="w-full p-2 mb-4 border rounded">
-            <input type="password" id="password" placeholder="密碼" class="w-full p-2 mb-6 border rounded">
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">登入</button>
+<body class="bg-gray-100 min-h-screen font-sans antialiased">
+
+    <div id="login-section" class="flex items-center justify-center min-h-screen px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-black text-indigo-600 system-title mb-2">社群連結管理系統</h1>
+                <p class="text-gray-400 text-sm font-medium">請輸入帳號密碼登入</p>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="text" id="username" placeholder="帳號" 
+                       autocapitalize="none" autocorrect="off"
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <input type="password" id="password" placeholder="密碼" 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <button onclick="handleLogin()" 
+                        class="w-full bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition duration-200 shadow-md">
+                    登入系統
+                </button>
+            </div>
         </div>
     </div>
 
-    <div id="main-section" class="hidden max-w-4xl mx-auto p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">歡迎, <span id="display-user"></span></h1>
-            <button onclick="location.reload()" class="text-red-500 underline text-sm">登出系統</button>
+    <div id="main-section" class="hidden max-w-4xl mx-auto p-4 md:p-6 pb-20">
+        
+        <div class="flex flex-col mb-6 border-b border-gray-200 pb-4">
+            <h1 class="text-xl font-black text-indigo-600 system-title mb-2">社群連結管理系統</h1>
+            <div class="flex justify-between items-center">
+                <p class="text-gray-600 font-medium">歡迎, <span id="display-user" class="text-indigo-600 font-bold"></span></p>
+                <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 text-xs underline">登出系統</button>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded shadow mb-8">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2">新增連結紀錄</h2>
+        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm mb-6 border border-gray-200">
+            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">新增連結紀錄</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><label class="block text-sm font-medium text-gray-700">紀錄人員</label><select id="recorder-select" class="w-full p-2 border rounded bg-gray-50"></select></div>
-                <div><label class="block text-sm font-medium text-gray-700">媒體名稱</label><select id="media-select" class="w-full p-2 border rounded"></select></div>
-                <div class="col-span-1 md:col-span-2"><label class="block text-sm font-medium text-gray-700">客戶名稱</label><input type="text" id="customer" class="w-full p-2 border rounded"></div>
-                <div class="col-span-1 md:col-span-2"><label class="block text-sm font-medium text-gray-700">分享連結</label><input type="url" id="link" class="w-full p-2 border rounded" placeholder="https://..."></div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">紀錄人員</label>
+                    <select id="recorder-select" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">媒體名稱</label>
+                    <select id="media-select" class="w-full p-3 border border-gray-300 rounded-lg"></select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">客戶名稱</label>
+                    <input type="text" id="customer" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="請輸入客戶名稱">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-500 mb-1">分享連結</label>
+                    <input type="url" id="link" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="https://...">
+                </div>
             </div>
-            <button onclick="submitData()" id="save-btn" class="mt-6 w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold">儲存紀錄</button>
+            <button onclick="submitData()" id="save-btn" 
+                    class="mt-6 w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg hover:bg-green-700 active:scale-95 transition duration-200 text-lg">
+                儲存紀錄
+            </button>
         </div>
 
-        <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2">我的歷史紀錄</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead><tr class="border-b bg-gray-50"><th class="p-2 text-sm">日期</th><th class="p-2 text-sm">客戶</th><th class="p-2 text-sm">媒體</th><th class="p-2 text-sm">連結</th></tr></thead>
-                    <tbody id="record-table-body" class="text-sm"></tbody>
-                </table>
+        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-200">
+            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">我的最近紀錄</h2>
+            <div class="overflow-x-auto -mx-5 md:mx-0">
+                <div class="inline-block min-w-full align-middle">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">日期</th>
+                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">客戶</th>
+                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">媒體</th>
+                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">連結</th>
+                            </tr>
+                        </thead>
+                        <tbody id="record-table-body" class="bg-white divide-y divide-gray-100 text-gray-700">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
-<script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec"; 
-    let userName = "";
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec"; 
+        let userName = "";
 
-    async function handleLogin() {
-        const user = document.getElementById('username').value.trim();
-        const pass = document.getElementById('password').value.trim();
+        async function handleLogin() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            if (!user || !pass) { alert("請填寫帳號與密碼"); return; }
 
-        if (!user || !pass) { alert("請填寫帳號與密碼"); return; }
+            const loginBtn = document.querySelector('button[onclick="handleLogin()"]');
+            loginBtn.disabled = true;
+            loginBtn.innerText = "驗證中...";
 
-        const loginBtn = document.querySelector('button[onclick="handleLogin()"]');
-        loginBtn.disabled = true;
-        loginBtn.innerText = "驗證中...";
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "login", username: user, password: pass })
+                });
+                const result = await response.json();
 
-        try {
-            const response = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "login", username: user, password: pass })
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                userName = result.displayName;
-                document.getElementById('display-user').innerText = userName;
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('main-section').classList.remove('hidden');
-                await initApp();
-            } else {
-                alert("驗證失敗：" + (result.msg || "帳號或密碼錯誤"));
-                loginBtn.disabled = false;
-                loginBtn.innerText = "登入";
-            }
-        } catch (error) {
-            console.error(error);
-            alert("連線發生錯誤，請稍後再試");
-            loginBtn.disabled = false;
-            loginBtn.innerText = "登入";
-        }
-    }
-
-    async function initApp() {
-        try {
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
-            const data = await res.json();
-            
-            const rSelect = document.getElementById('recorder-select');
-            const mSelect = document.getElementById('media-select');
-            
-            rSelect.innerHTML = "";
-            mSelect.innerHTML = "";
-
-            data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
-            rSelect.value = userName;
-
-            data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
-            
-            await fetchUserRecords();
-        } catch (e) { console.error("初始化資料失敗", e); }
-    }
-
-    async function fetchUserRecords() {
-        try {
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
-            const data = await res.json();
-            const tbody = document.getElementById('record-table-body');
-            
-            if (data.records && data.records.length > 0) {
-                tbody.innerHTML = data.records.map(r => `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-2">${r.date}</td>
-                        <td class="p-2">${r.customer}</td>
-                        <td class="p-2">${r.media}</td>
-                        <td class="p-2 text-blue-600"><a href="${r.link}" target="_blank">點擊查看</a></td>
-                    </tr>
-                `).reverse().join(''); // 最新的排在前面
-            } else {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">尚無紀錄</td></tr>';
-            }
-        } catch (e) { console.error("抓取歷史紀錄失敗", e); }
-    }
-
-    async function submitData() {
-        const saveBtn = document.getElementById('save-btn');
-        const customer = document.getElementById('customer').value.trim();
-        const link = document.getElementById('link').value.trim();
-        const media = document.getElementById('media-select').value;
-        const recorder = document.getElementById('recorder-select').value;
-
-        if (!customer || !link) { alert("請完整填寫客戶名稱與連結"); return; }
-
-        saveBtn.disabled = true;
-        saveBtn.innerText = "儲存中...";
-
-        try {
-            const payload = {
-                action: "saveRecord",
-                recorder: recorder,
-                customer: customer,
-                media: media,
-                link: link,
-                likes: 0, comments: 0, shares: 0
-            };
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-            const result = await res.json();
-
-            if (result.success) {
-                alert("儲存成功！");
-                document.getElementById('customer').value = "";
-                document.getElementById('link').value = "";
-                await fetchUserRecords(); // 重新整理列表
-            }
-        } catch (e) {
-            alert("儲存失敗，請檢查連線");
-        } finally {
-            saveBtn.disabled = false;
-            saveBtn.innerText = "儲存紀錄";
-        }
-    }
-</script>
-</body>
-</html>
+                if (result.success) {
+                    userName = result.displayName;
+                    document.getElementById('display-user').innerText = userName;
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('main-section').classList.remove('hidden');
+                    await initApp();
+                } else {
+                    alert(result.msg || "帳號或密碼錯誤");
