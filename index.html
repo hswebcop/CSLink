@@ -44,66 +44,96 @@
         </div>
     </div>
 
-    <script>https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec";
-        let userName = "";
+   <script>
+    // 1. 請務必確認這裡的 URL 是正確的 /exec 網址
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec"; 
+    let userName = "";
 
-        async function handleLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "login", username: user, password: pass }) });
-            const result = await res.json();
+    // 2. 登入函式 (確保放在全域作用域)
+    async function handleLogin() {
+        console.log("嘗試登入..."); // 除錯紀錄
+        const userEl = document.getElementById('username');
+        const passEl = document.getElementById('password');
+
+        if (!userEl || !passEl) {
+            alert("網頁元件讀取錯誤");
+            return;
+        }
+
+        const user = userEl.value.trim();
+        const pass = passEl.value.trim();
+
+        if (!user || !pass) {
+            alert("請填寫帳號與密碼");
+            return;
+        }
+
+        try {
+            // 顯示登入中狀態
+            const loginBtn = document.querySelector('button[onclick="handleLogin()"]');
+            const originalText = loginBtn.innerText;
+            loginBtn.disabled = true;
+            loginBtn.innerText = "驗證中...";
+
+            const res = await fetch(GAS_URL, {
+                method: "POST",
+                mode: "no-cors", // 預防部分瀏覽器跨域限制
+                body: JSON.stringify({ action: "login", username: user, password: pass })
+            });
+
+            // 注意：GAS Web App 的 POST 請求在 no-cors 模式下無法直接讀取回傳值
+            // 我們改用標準模式，並確保 GAS 有正確處理 CORS
+            const standardRes = await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "login", username: user, password: pass })
+            });
+            
+            const result = await standardRes.json();
+            console.log("收到回應:", result);
 
             if (result.success) {
                 userName = result.displayName;
                 document.getElementById('display-user').innerText = userName;
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-section').classList.remove('hidden');
-                initApp();
-            } else { alert("驗證失敗"); }
+                initApp(); // 登入成功後載入下拉選單與歷史紀錄
+            } else {
+                alert("驗證失敗：" + (result.msg || "帳號或密碼錯誤"));
+                loginBtn.disabled = false;
+                loginBtn.innerText = originalText;
+            }
+        } catch (error) {
+            console.error("發生錯誤:", error);
+            alert("連線失敗，請檢查 GAS 網址是否正確並已發布為「所有人(Anyone)」存取");
+            document.querySelector('button[onclick="handleLogin()"]').disabled = false;
         }
+    }
 
-        async function initApp() {
-            // 載入下拉選單
+    // 初始化 App (載入下拉選單與歷史紀錄)
+    async function initApp() {
+        console.log("載入選單資料...");
+        try {
             const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
             const data = await res.json();
             
             const rSelect = document.getElementById('recorder-select');
-            data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
-            rSelect.value = userName; // 預設選中目前登入者
-
             const mSelect = document.getElementById('media-select');
+            
+            rSelect.innerHTML = "";
+            mSelect.innerHTML = "";
+
+            data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
+            rSelect.value = userName;
+
             data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
-
+            
             fetchUserRecords();
+        } catch (e) {
+            console.error("初始化失敗:", e);
         }
+    }
 
-        async function fetchUserRecords() {
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
-            const data = await res.json();
-            const tbody = document.getElementById('record-table-body');
-            tbody.innerHTML = data.records.map(r => `
-                <tr class="border-b">
-                    <td class="p-2">${r.date}</td>
-                    <td class="p-2">${r.customer}</td>
-                    <td class="p-2">${r.media}</td>
-                    <td class="p-2 text-blue-600 truncate max-w-xs"><a href="${r.link}" target="_blank">點擊開啟</a></td>
-                </tr>
-            `).join('');
-        }
-
-        async function submitData() {
-            const payload = {
-                action: "saveRecord",
-                recorder: document.getElementById('recorder-select').value,
-                customer: document.getElementById('customer').value,
-                media: document.getElementById('media-select').value,
-                link: document.getElementById('link').value,
-                likes: 0, comments: 0, shares: 0
-            };
-            await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-            alert("已儲存！");
-            fetchUserRecords();
-        }
-    </script>
+    // 這裡補上之前的 fetchUserRecords 和 submitData 函式...
+</script>
 </body>
 </html>
