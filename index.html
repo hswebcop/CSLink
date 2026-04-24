@@ -12,106 +12,79 @@
             <h2 class="text-2xl font-bold mb-6 text-center">系統登入</h2>
             <input type="text" id="username" placeholder="帳號" class="w-full p-2 mb-4 border rounded">
             <input type="password" id="password" placeholder="密碼" class="w-full p-2 mb-6 border rounded">
-            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white p-2 rounded">登入</button>
+            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">登入</button>
         </div>
     </div>
 
     <div id="main-section" class="hidden max-w-4xl mx-auto p-6">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold">歡迎, <span id="display-user"></span></h1>
-            <button onclick="location.reload()" class="text-red-500 underline">登出</button>
+            <button onclick="location.reload()" class="text-red-500 underline text-sm">登出系統</button>
         </div>
 
         <div class="bg-white p-6 rounded shadow mb-8">
-            <h2 class="text-xl font-semibold mb-4">新增連結紀錄</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-sm">紀錄人員</label><select id="recorder-select" class="w-full p-2 border rounded bg-gray-100"></select></div>
-                <div><label class="block text-sm">媒體名稱</label><select id="media-select" class="w-full p-2 border rounded"></select></div>
-                <div class="col-span-2"><label class="block text-sm">客戶名稱</label><input type="text" id="customer" class="w-full p-2 border rounded"></div>
-                <div class="col-span-2"><label class="block text-sm">分享連結</label><input type="url" id="link" class="w-full p-2 border rounded"></div>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">新增連結紀錄</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="block text-sm font-medium text-gray-700">紀錄人員</label><select id="recorder-select" class="w-full p-2 border rounded bg-gray-50"></select></div>
+                <div><label class="block text-sm font-medium text-gray-700">媒體名稱</label><select id="media-select" class="w-full p-2 border rounded"></select></div>
+                <div class="col-span-1 md:col-span-2"><label class="block text-sm font-medium text-gray-700">客戶名稱</label><input type="text" id="customer" class="w-full p-2 border rounded"></div>
+                <div class="col-span-1 md:col-span-2"><label class="block text-sm font-medium text-gray-700">分享連結</label><input type="url" id="link" class="w-full p-2 border rounded" placeholder="https://..."></div>
             </div>
-            <button onclick="submitData()" class="mt-4 w-full bg-green-600 text-white p-2 rounded">儲存</button>
+            <button onclick="submitData()" id="save-btn" class="mt-6 w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold">儲存紀錄</button>
         </div>
 
         <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-xl font-semibold mb-4">我的歷史紀錄</h2>
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">我的歷史紀錄</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-                    <thead><tr class="border-b bg-gray-50"><th class="p-2">日期</th><th class="p-2">客戶</th><th class="p-2">媒體</th><th class="p-2">連結</th></tr></thead>
-                    <tbody id="record-table-body"></tbody>
+                    <thead><tr class="border-b bg-gray-50"><th class="p-2 text-sm">日期</th><th class="p-2 text-sm">客戶</th><th class="p-2 text-sm">媒體</th><th class="p-2 text-sm">連結</th></tr></thead>
+                    <tbody id="record-table-body" class="text-sm"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-   <script>
-    // 1. 請務必確認這裡的 URL 是正確的 /exec 網址
+<script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec"; 
     let userName = "";
 
-    // 2. 登入函式 (確保放在全域作用域)
     async function handleLogin() {
-        console.log("嘗試登入..."); // 除錯紀錄
-        const userEl = document.getElementById('username');
-        const passEl = document.getElementById('password');
+        const user = document.getElementById('username').value.trim();
+        const pass = document.getElementById('password').value.trim();
 
-        if (!userEl || !passEl) {
-            alert("網頁元件讀取錯誤");
-            return;
-        }
+        if (!user || !pass) { alert("請填寫帳號與密碼"); return; }
 
-        const user = userEl.value.trim();
-        const pass = passEl.value.trim();
-
-        if (!user || !pass) {
-            alert("請填寫帳號與密碼");
-            return;
-        }
+        const loginBtn = document.querySelector('button[onclick="handleLogin()"]');
+        loginBtn.disabled = true;
+        loginBtn.innerText = "驗證中...";
 
         try {
-            // 顯示登入中狀態
-            const loginBtn = document.querySelector('button[onclick="handleLogin()"]');
-            const originalText = loginBtn.innerText;
-            loginBtn.disabled = true;
-            loginBtn.innerText = "驗證中...";
-
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                mode: "no-cors", // 預防部分瀏覽器跨域限制
-                body: JSON.stringify({ action: "login", username: user, password: pass })
-            });
-
-            // 注意：GAS Web App 的 POST 請求在 no-cors 模式下無法直接讀取回傳值
-            // 我們改用標準模式，並確保 GAS 有正確處理 CORS
-            const standardRes = await fetch(GAS_URL, {
+            const response = await fetch(GAS_URL, {
                 method: "POST",
                 body: JSON.stringify({ action: "login", username: user, password: pass })
             });
-            
-            const result = await standardRes.json();
-            console.log("收到回應:", result);
+            const result = await response.json();
 
             if (result.success) {
                 userName = result.displayName;
                 document.getElementById('display-user').innerText = userName;
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('main-section').classList.remove('hidden');
-                initApp(); // 登入成功後載入下拉選單與歷史紀錄
+                await initApp();
             } else {
                 alert("驗證失敗：" + (result.msg || "帳號或密碼錯誤"));
                 loginBtn.disabled = false;
-                loginBtn.innerText = originalText;
+                loginBtn.innerText = "登入";
             }
         } catch (error) {
-            console.error("發生錯誤:", error);
-            alert("連線失敗，請檢查 GAS 網址是否正確並已發布為「所有人(Anyone)」存取");
-            document.querySelector('button[onclick="handleLogin()"]').disabled = false;
+            console.error(error);
+            alert("連線發生錯誤，請稍後再試");
+            loginBtn.disabled = false;
+            loginBtn.innerText = "登入";
         }
     }
 
-    // 初始化 App (載入下拉選單與歷史紀錄)
     async function initApp() {
-        console.log("載入選單資料...");
         try {
             const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
             const data = await res.json();
@@ -127,13 +100,68 @@
 
             data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
             
-            fetchUserRecords();
-        } catch (e) {
-            console.error("初始化失敗:", e);
-        }
+            await fetchUserRecords();
+        } catch (e) { console.error("初始化資料失敗", e); }
     }
 
-    // 這裡補上之前的 fetchUserRecords 和 submitData 函式...
+    async function fetchUserRecords() {
+        try {
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
+            const data = await res.json();
+            const tbody = document.getElementById('record-table-body');
+            
+            if (data.records && data.records.length > 0) {
+                tbody.innerHTML = data.records.map(r => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-2">${r.date}</td>
+                        <td class="p-2">${r.customer}</td>
+                        <td class="p-2">${r.media}</td>
+                        <td class="p-2 text-blue-600"><a href="${r.link}" target="_blank">點擊查看</a></td>
+                    </tr>
+                `).reverse().join(''); // 最新的排在前面
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-gray-400">尚無紀錄</td></tr>';
+            }
+        } catch (e) { console.error("抓取歷史紀錄失敗", e); }
+    }
+
+    async function submitData() {
+        const saveBtn = document.getElementById('save-btn');
+        const customer = document.getElementById('customer').value.trim();
+        const link = document.getElementById('link').value.trim();
+        const media = document.getElementById('media-select').value;
+        const recorder = document.getElementById('recorder-select').value;
+
+        if (!customer || !link) { alert("請完整填寫客戶名稱與連結"); return; }
+
+        saveBtn.disabled = true;
+        saveBtn.innerText = "儲存中...";
+
+        try {
+            const payload = {
+                action: "saveRecord",
+                recorder: recorder,
+                customer: customer,
+                media: media,
+                link: link,
+                likes: 0, comments: 0, shares: 0
+            };
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+            const result = await res.json();
+
+            if (result.success) {
+                alert("儲存成功！");
+                document.getElementById('customer').value = "";
+                document.getElementById('link').value = "";
+                await fetchUserRecords(); // 重新整理列表
+            }
+        } catch (e) {
+            alert("儲存失敗，請檢查連線");
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "儲存紀錄";
+        }
+    }
 </script>
 </body>
 </html>
