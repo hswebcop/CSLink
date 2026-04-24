@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社群連結管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="login-section" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded shadow-lg w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center">系統登入</h2>
+            <input type="text" id="username" placeholder="帳號" class="w-full p-2 mb-4 border rounded">
+            <input type="password" id="password" placeholder="密碼" class="w-full p-2 mb-6 border rounded">
+            <button onclick="handleLogin()" class="w-full bg-indigo-600 text-white p-2 rounded">登入</button>
+        </div>
+    </div>
+
+    <div id="main-section" class="hidden max-w-4xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">歡迎, <span id="display-user"></span></h1>
+            <button onclick="location.reload()" class="text-red-500 underline">登出</button>
+        </div>
+
+        <div class="bg-white p-6 rounded shadow mb-8">
+            <h2 class="text-xl font-semibold mb-4">新增連結紀錄</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-sm">紀錄人員</label><select id="recorder-select" class="w-full p-2 border rounded bg-gray-100"></select></div>
+                <div><label class="block text-sm">媒體名稱</label><select id="media-select" class="w-full p-2 border rounded"></select></div>
+                <div class="col-span-2"><label class="block text-sm">客戶名稱</label><input type="text" id="customer" class="w-full p-2 border rounded"></div>
+                <div class="col-span-2"><label class="block text-sm">分享連結</label><input type="url" id="link" class="w-full p-2 border rounded"></div>
+            </div>
+            <button onclick="submitData()" class="mt-4 w-full bg-green-600 text-white p-2 rounded">儲存</button>
+        </div>
+
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4">我的歷史紀錄</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead><tr class="border-b bg-gray-50"><th class="p-2">日期</th><th class="p-2">客戶</th><th class="p-2">媒體</th><th class="p-2">連結</th></tr></thead>
+                    <tbody id="record-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec";
+        let userName = "";
+
+        async function handleLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "login", username: user, password: pass }) });
+            const result = await res.json();
+
+            if (result.success) {
+                userName = result.displayName;
+                document.getElementById('display-user').innerText = userName;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('main-section').classList.remove('hidden');
+                initApp();
+            } else { alert("驗證失敗"); }
+        }
+
+        async function initApp() {
+            // 載入下拉選單
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
+            const data = await res.json();
+            
+            const rSelect = document.getElementById('recorder-select');
+            data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
+            rSelect.value = userName; // 預設選中目前登入者
+
+            const mSelect = document.getElementById('media-select');
+            data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
+
+            fetchUserRecords();
+        }
+
+        async function fetchUserRecords() {
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
+            const data = await res.json();
+            const tbody = document.getElementById('record-table-body');
+            tbody.innerHTML = data.records.map(r => `
+                <tr class="border-b">
+                    <td class="p-2">${r.date}</td>
+                    <td class="p-2">${r.customer}</td>
+                    <td class="p-2">${r.media}</td>
+                    <td class="p-2 text-blue-600 truncate max-w-xs"><a href="${r.link}" target="_blank">點擊開啟</a></td>
+                </tr>
+            `).join('');
+        }
+
+        async function submitData() {
+            const payload = {
+                action: "saveRecord",
+                recorder: document.getElementById('recorder-select').value,
+                customer: document.getElementById('customer').value,
+                media: document.getElementById('media-select').value,
+                link: document.getElementById('link').value,
+                likes: 0, comments: 0, shares: 0
+            };
+            await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+            alert("已儲存！");
+            fetchUserRecords();
+        }
+    </script>
+</body>
+</html>
