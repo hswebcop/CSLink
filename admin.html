@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 - 連結清單</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; }
+        .container { max-width: 1000px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #4F46E5; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .stats-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #EEF2FF; padding: 15px 25px; border-radius: 10px; border-left: 5px solid #4F46E5; flex: 1; min-width: 150px; }
+        .stat-card span { display: block; font-size: 24px; font-weight: bold; color: #4F46E5; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background-color: #4F46E5; color: white; text-align: left; padding: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; }
+        tr:hover { background-color: #f9fafb; }
+        .btn { background: #4F46E5; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        .btn:hover { background: #3730a3; }
+        .loading { text-align: center; color: #666; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 紀錄人員績效統計</h2>
+    <div id="stats-area" class="stats-section">
+        <div class="loading">正在計算統計數據...</div>
+    </div>
+
+    <h2>🔗 所有連結管理清單</h2>
+    <table id="link-table">
+        <thead>
+            <tr>
+                <th>記錄人</th>
+                <th>客戶名稱</th>
+                <th>媒體</th>
+                <th>連結</th>
+                <th>管理操作</th>
+            </tr>
+        </thead>
+        <tbody id="link-body">
+            <tr><td colspan="5" class="loading">正在從雲端資料庫讀取資料...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // ⚠️ 請填入你 GAS 部署後的「網頁應用程式網址」
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec";
+
+    window.onload = function() {
+        fetchStats();
+        fetchLinks();
+    };
+
+    // 1. 取得統計數據
+    async function fetchStats() {
+        try {
+            const response = await fetch(`${GAS_URL}?action=getStats`);
+            const data = await response.json();
+            const area = document.getElementById('stats-area');
+            area.innerHTML = "";
+            for (const [name, count] of Object.entries(data)) {
+                area.innerHTML += `<div class="stat-card"><strong>${name}</strong><span>${count} 筆</span></div>`;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // 2. 取得連結清單
+    async function fetchLinks() {
+        try {
+            const response = await fetch(`${GAS_URL}?action=getLinks`);
+            const links = await response.json();
+            const tbody = document.getElementById('link-body');
+            tbody.innerHTML = "";
+            links.forEach(link => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${link.recorder}</td>
+                        <td>${link.client}</td>
+                        <td>${link.media}</td>
+                        <td><a href="${link.url}" target="_blank" style="color:#4F46E5">點此開啟</a></td>
+                        <td><button class="btn" onclick="editLink(${link.id})">編輯網址</button></td>
+                    </tr>
+                `;
+            });
+        } catch (e) { console.error(e); }
+    }
+
+    // 3. 修改連結功能 (示範)
+    function editLink(rowId) {
+        const newUrl = prompt("請輸入新的連結網址:");
+        if (newUrl) {
+            alert("正在連線至雲端進行修改，請稍候...\n(此功能需搭配 doPost 權限驗證)");
+            // 這裡後續可以串接 fetch POST 到 GAS
+        }
+    }
+</script>
+
+</body>
+</html>
