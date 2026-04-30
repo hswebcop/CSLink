@@ -6,18 +6,26 @@
     <title>後台管理系統 - 連結清單</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; color: #333; }
-        .container { max-width: 1000px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 1200px; margin: 30px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #4F46E5; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .stats-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px; }
         .stat-card { background: #EEF2FF; padding: 15px 25px; border-radius: 10px; border-left: 5px solid #4F46E5; flex: 1; min-width: 150px; }
         .stat-card span { display: block; font-size: 24px; font-weight: bold; color: #4F46E5; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
         th { background-color: #4F46E5; color: white; text-align: left; padding: 12px; }
-        td { padding: 12px; border-bottom: 1px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #ddd; word-wrap: break-word; font-size: 14px; }
         tr:hover { background-color: #f9fafb; }
-        .btn { background: #4F46E5; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; }
+        .url-text { color: #4F46E5; text-decoration: none; word-break: break-all; }
+        .btn { background: #4F46E5; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap; }
         .btn:hover { background: #3730a3; }
         .loading { text-align: center; color: #666; padding: 20px; }
+        /* 設定欄位寬度 */
+        .col-name { width: 10%; }
+        .col-date { width: 12%; }
+        .col-client { width: 15%; }
+        .col-media { width: 10%; }
+        .col-url { width: 43%; }
+        .col-action { width: 10%; }
     </style>
 </head>
 <body>
@@ -32,15 +40,16 @@
     <table id="link-table">
         <thead>
             <tr>
-                <th>記錄人</th>
-                <th>客戶名稱</th>
-                <th>媒體</th>
-                <th>連結</th>
-                <th>管理操作</th>
+                <th class="col-name">紀錄人員</th>
+                <th class="col-date">紀錄日期</th>
+                <th class="col-client">客戶名稱</th>
+                <th class="col-media">媒體</th>
+                <th class="col-url">分享連結 (完整網址)</th>
+                <th class="col-action">管理</th>
             </tr>
         </thead>
         <tbody id="link-body">
-            <tr><td colspan="5" class="loading">正在從雲端資料庫讀取資料...</td></tr>
+            <tr><td colspan="6" class="loading">正在從雲端資料庫讀取資料...</td></tr>
         </tbody>
     </table>
 </div>
@@ -64,7 +73,7 @@
             for (const [name, count] of Object.entries(data)) {
                 area.innerHTML += `<div class="stat-card"><strong>${name}</strong><span>${count} 筆</span></div>`;
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("統計載入失敗", e); }
     }
 
     // 2. 取得連結清單
@@ -74,26 +83,34 @@
             const links = await response.json();
             const tbody = document.getElementById('link-body');
             tbody.innerHTML = "";
+            
             links.forEach(link => {
+                // 格式化日期 (如果是日期物件的話)
+                let dateStr = link.date;
+                if(dateStr && dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+
                 tbody.innerHTML += `
                     <tr>
                         <td>${link.recorder}</td>
+                        <td>${dateStr}</td>
                         <td>${link.client}</td>
                         <td>${link.media}</td>
-                        <td><a href="${link.url}" target="_blank" style="color:#4F46E5">點此開啟</a></td>
-                        <td><button class="btn" onclick="editLink(${link.id})">編輯網址</button></td>
+                        <td><a href="${link.url}" target="_blank" class="url-text">${link.url}</a></td>
+                        <td><button class="btn" onclick="editLink(${link.id})">編輯</button></td>
                     </tr>
                 `;
             });
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("連結載入失敗", e);
+            document.getElementById('link-body').innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">載入失敗，請檢查 GAS 部署網址是否正確。</td></tr>';
+        }
     }
 
-    // 3. 修改連結功能 (示範)
     function editLink(rowId) {
         const newUrl = prompt("請輸入新的連結網址:");
         if (newUrl) {
-            alert("正在連線至雲端進行修改，請稍候...\n(此功能需搭配 doPost 權限驗證)");
-            // 這裡後續可以串接 fetch POST 到 GAS
+            alert("正在連線至雲端進行修改，請稍候...");
+            // 修改功能後續擴充...
         }
     }
 </script>
