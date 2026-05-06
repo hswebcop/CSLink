@@ -1,209 +1,1076 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>社群連結管理系統</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        input, select, button { font-size: 16px !important; }
-        .system-title { letter-spacing: 0.05em; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社群連結管理系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --bg2: #16161d;
+    --bg3: #1e1e28;
+    --surface: #23232f;
+    --surface2: #2a2a38;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --accent: #7c6ff7;
+    --accent2: #a89af8;
+    --accent-glow: rgba(124,111,247,0.18);
+    --text: #e8e6f0;
+    --text2: #9997b0;
+    --text3: #6b697f;
+    --success: #4ade80;
+    --error: #f87171;
+    --warning: #fbbf24;
+    --info: #60a5fa;
+    --red: #ef4444;
+    --teal: #2dd4bf;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Background mesh ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 10%, rgba(124,111,247,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 300px at 80% 80%, rgba(45,212,191,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Pages ─── */
+  .page { display: none; position: relative; z-index: 1; min-height: 100vh; }
+  .page.active { display: flex; }
+
+  /* ════════════════════════════════════
+     LOGIN PAGE
+  ════════════════════════════════════ */
+  #page-login {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 40px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .login-logo .icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  .login-logo .brand {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .login-logo .brand span {
+    color: var(--accent2);
+  }
+
+  .login-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .login-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 32px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239997b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #6254e0);
+    color: #fff;
+    padding: 14px;
+    font-size: 15px;
+    box-shadow: 0 4px 20px rgba(124,111,247,0.3);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(124,111,247,0.4);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .alert.error { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--error); }
+  .alert.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: var(--success); }
+  .alert.show { display: block; }
+
+  /* ════════════════════════════════════
+     MAIN APP LAYOUT
+  ════════════════════════════════════ */
+  #page-app {
+    flex-direction: column;
+  }
+
+  /* ─── Topbar ─── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 60px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .topbar-brand .dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-user .avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .topbar-user .name {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .topbar-user .name strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 7px;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+
+  .btn-ghost:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  /* ─── Tab Nav ─── */
+  .tabnav {
+    display: flex;
+    padding: 0 24px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    gap: 4px;
+  }
+
+  .tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ─── Content ─── */
+  .content {
+    flex: 1;
+    padding: 28px 24px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── Panel Cards ─── */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .panel-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--accent-glow);
+    color: var(--accent2);
+    border: 1px solid rgba(124,111,247,0.2);
+  }
+
+  /* ─── Form Grid ─── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  /* ─── Table ─── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--surface);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+
+  tbody td {
+    padding: 12px 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .link-cell a {
+    color: var(--accent2);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    max-width: 200px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+
+  .link-cell a:hover { text-decoration: underline; }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .tag-media {
+    background: rgba(96,165,250,0.12);
+    color: var(--info);
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+
+  /* ─── Stats Row ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .stat-chip .num {
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* ─── Search ─── */
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-bar .form-input {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .btn-accent {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 12px rgba(124,111,247,0.25);
+  }
+
+  .btn-accent:hover {
+    background: #6a5de0;
+    box-shadow: 0 4px 18px rgba(124,111,247,0.35);
+  }
+
+  /* ─── Empty State ─── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text3);
+  }
+
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ─── Loading ─── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .loading-overlay.show { display: flex; }
+  .loading-overlay .msg { color: var(--text2); font-size: 14px; }
+
+  /* ─── Char count ─── */
+  .field-hint {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 5px;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* ─── Pagination ─── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .pagination .pages {
+    display: flex;
+    gap: 4px;
+  }
+
+  .page-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .page-btn:hover, .page-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border2);
+  }
+
+  .page-btn.active {
+    background: var(--accent-glow);
+    border-color: rgba(124,111,247,0.3);
+    color: var(--accent2);
+  }
+
+  /* ─── Toast ─── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    max-width: 320px;
+    animation: slideIn 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.success { background: #1a2e1e; border: 1px solid rgba(74,222,128,0.3); color: var(--success); }
+  .toast.error { background: #2e1a1a; border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+  .toast.info { background: #1a2236; border: 1px solid rgba(96,165,250,0.3); color: var(--info); }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans antialiased">
+<body>
 
-    <div id="login-section" class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm">
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-black text-indigo-600 system-title mb-2">社群連結管理系統</h1>
-                <p class="text-gray-400 text-sm font-medium">請輸入帳號密碼登入</p>
-            </div>
-            
-            <div class="space-y-4">
-                <input type="text" id="username" placeholder="帳號" 
-                       autocapitalize="none" autocorrect="off"
-                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                <input type="password" id="password" placeholder="密碼" 
-                       class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
-                <button type="button" onclick="handleLogin()" id="login-btn"
-                        class="w-full bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition duration-200 shadow-md">
-                    登入系統
-                </button>
-            </div>
+<!-- ════ LOADING OVERLAY ════ -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner" style="width:32px;height:32px;border-width:3px"></div>
+  <div class="msg" id="loading-msg">處理中⋯</div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- ════════════════════════════════════
+     PAGE: LOGIN
+════════════════════════════════════ -->
+<div class="page active" id="page-login">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="icon">🔗</div>
+      <div class="brand">Link<span>Hub</span></div>
+    </div>
+    <div class="login-title">歡迎回來</div>
+    <div class="login-sub">請登入以管理您的社群連結</div>
+
+    <div class="alert error" id="login-error"></div>
+
+    <div class="form-group">
+      <label class="form-label">帳號</label>
+      <input type="text" class="form-input" id="login-id" placeholder="輸入帳號" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label">密碼</label>
+      <input type="password" class="form-input" id="login-pw" placeholder="輸入密碼" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" id="btn-login" onclick="doLogin()">
+      <span id="login-btn-txt">登入</span>
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PAGE: APP
+════════════════════════════════════ -->
+<div class="page" id="page-app">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="dot"></div>
+      LinkHub 社群連結管理
+    </div>
+    <div class="topbar-user">
+      <div class="avatar" id="user-avatar">--</div>
+      <div class="name">登入者：<strong id="user-display">--</strong></div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">登出</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabnav">
+    <button class="tab active" onclick="switchTab('add', this)">➕ 新增連結</button>
+    <button class="tab" onclick="switchTab('my', this)">📋 我的連結</button>
+    <button class="tab" onclick="switchTab('all', this)">🌐 所有連結</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ─── TAB: 新增連結 ─── -->
+    <div class="tab-panel active" id="tab-add">
+      <div class="panel">
+        <div class="panel-title">
+          新增連結紀錄
+          <span class="badge">NEW</span>
         </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">紀錄人員</label>
+            <select class="form-input form-select" id="rec-recorder">
+              <option value="">— 選擇人員 —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">媒體名稱</label>
+            <select class="form-input form-select" id="rec-media">
+              <option value="">— 選擇媒體 —</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">分享連結</label>
+            <input type="url" class="form-input" id="rec-url" placeholder="https://...">
+            <div class="field-hint">請貼上完整的社群媒體分享連結</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">按讚數</label>
+            <input type="number" class="form-input" id="rec-likes" placeholder="0" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">分享數</label>
+            <input type="number" class="form-input" id="rec-shares" placeholder="0" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">留言數</label>
+            <input type="number" class="form-input" id="rec-comments" placeholder="0" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">備註</label>
+            <input type="text" class="form-input" id="rec-note" placeholder="選填">
+          </div>
+        </div>
+        <div class="divider"></div>
+        <button class="btn btn-primary" style="max-width:200px" onclick="submitRecord()">
+          儲存連結紀錄
+        </button>
+      </div>
     </div>
 
-    <div id="main-section" class="hidden max-w-4xl mx-auto p-4 md:p-6 pb-20">
-        <div class="flex flex-col mb-6 border-b border-gray-200 pb-4">
-            <h1 class="text-xl font-black text-indigo-600 system-title mb-2">社群連結管理系統</h1>
-            <div class="flex justify-between items-center">
-                <p class="text-gray-600 font-medium">歡迎, <span id="display-user" class="text-indigo-600 font-bold"></span></p>
-                <button onclick="location.reload()" class="text-gray-400 hover:text-red-500 text-xs underline">登出系統</button>
-            </div>
+    <!-- ─── TAB: 我的連結 ─── -->
+    <div class="tab-panel" id="tab-my">
+      <div class="panel">
+        <div class="panel-title">我的連結紀錄</div>
+        <div class="search-bar">
+          <select class="form-input form-select" id="my-filter-media" style="max-width:200px">
+            <option value="">全部媒體</option>
+          </select>
+          <button class="btn btn-accent btn-sm" onclick="loadMyLinks()">🔍 查詢</button>
         </div>
-
-        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm mb-6 border border-gray-200">
-            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">新增連結紀錄</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">紀錄人員</label>
-                    <select id="recorder-select" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"></select>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">媒體名稱</label>
-                    <select id="media-select" class="w-full p-3 border border-gray-300 rounded-lg"></select>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">客戶名稱</label>
-                    <input type="text" id="customer" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="請輸入客戶名稱">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">分享連結</label>
-                    <input type="url" id="link" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="https://...">
-                </div>
-            </div>
-            <button onclick="submitData()" id="save-btn" 
-                    class="mt-6 w-full bg-green-600 text-white p-4 rounded-xl font-bold shadow-lg hover:bg-green-700 active:scale-95 transition duration-200 text-lg">
-                儲存紀錄
-            </button>
-        </div>
-
-        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-200">
-            <h2 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">我的最近紀錄</h2>
-            <div class="overflow-x-auto -mx-5 md:mx-0">
-                <div class="inline-block min-w-full align-middle">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">日期</th>
-                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">客戶</th>
-                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">媒體</th>
-                                <th class="p-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">連結</th>
-                            </tr>
-                        </thead>
-                        <tbody id="record-table-body" class="bg-white divide-y divide-gray-100 text-gray-700"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <div id="my-table-wrap"></div>
+        <div class="pagination" id="my-pagination"></div>
+      </div>
     </div>
 
-    <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzgkPZXW41f5Liiffsm-jwUp0JzB5TlEml7EbQjDlw55bT3MN3uu4WfJxW3Hj5lxett/exec"; 
-        let userName = "";
+    <!-- ─── TAB: 所有連結 ─── -->
+    <div class="tab-panel" id="tab-all">
+      <div class="panel">
+        <div class="panel-title">所有連結紀錄</div>
+        <div class="search-bar">
+          <select class="form-input form-select" id="all-filter-recorder" style="max-width:180px">
+            <option value="">全部人員</option>
+          </select>
+          <select class="form-input form-select" id="all-filter-media" style="max-width:180px">
+            <option value="">全部媒體</option>
+          </select>
+          <button class="btn btn-accent btn-sm" onclick="loadAllLinks()">🔍 查詢</button>
+        </div>
+        <div id="all-table-wrap"></div>
+        <div class="pagination" id="all-pagination"></div>
+      </div>
+    </div>
 
-        // 登入函式
-        async function handleLogin() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            if (!user || !pass) { alert("請填寫帳號與密碼"); return; }
+  </div>
+</div>
 
-            const loginBtn = document.getElementById('login-btn');
-            loginBtn.disabled = true;
-            loginBtn.innerText = "驗證中...";
+<script>
+// ════════════════════════════════════
+// CONFIG — Replace with your GAS URL
+// ════════════════════════════════════
+const GAS_URL = 'YOUR_GAS_DEPLOY_URL_HERE';
 
-            try {
-                const response = await fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "login", username: user, password: pass })
-                });
-                const result = await response.json();
+// ════════════════════════════════════
+// STATE
+// ════════════════════════════════════
+let currentUser = null; // { id, name }
+let allUsers = [];
+let allMedia = [];
+let myLinksData = [];
+let allLinksData = [];
+const PAGE_SIZE = 15;
+let myPage = 1;
+let allPage = 1;
 
-                if (result.success) {
-                    userName = result.displayName;
-                    document.getElementById('display-user').innerText = userName;
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('main-section').classList.remove('hidden');
-                    await initApp();
-                } else {
-                    alert(result.msg || "登入失敗");
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "登入系統";
-                }
-            } catch (error) {
-                console.error(error);
-                alert("伺服器連線失敗");
-                loginBtn.disabled = false;
-                loginBtn.innerText = "登入系統";
-            }
-        }
+// ════════════════════════════════════
+// UTILITIES
+// ════════════════════════════════════
+function showLoading(msg = '處理中⋯') {
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading').classList.add('show');
+}
 
-        async function initApp() {
-            try {
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
-                const data = await res.json();
-                
-                const rSelect = document.getElementById('recorder-select');
-                const mSelect = document.getElementById('media-select');
-                
-                rSelect.innerHTML = "";
-                mSelect.innerHTML = "";
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
 
-                data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
-                rSelect.value = userName;
-                data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
-                
-                await fetchUserRecords();
-            } catch (e) { console.error("初始化資料失敗", e); }
-        }
+function toast(msg, type = 'info', dur = 3000) {
+  const c = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = (type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : 'ℹ ') + msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), dur);
+}
 
-        async function fetchUserRecords() {
-            try {
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
-                const data = await res.json();
-                const tbody = document.getElementById('record-table-body');
-                
-                if (data.records && data.records.length > 0) {
-                    tbody.innerHTML = data.records.map(r => `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-3 text-sm whitespace-nowrap">${r.date}</td>
-                            <td class="p-3 text-sm font-medium">${r.customer}</td>
-                            <td class="p-3 text-sm text-gray-500">${r.media}</td>
-                            <td class="p-3 text-sm"><a href="${r.link}" target="_blank" class="text-indigo-600 font-bold">查看</a></td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">尚無歷史紀錄</td></tr>';
-                }
-            } catch (e) { console.error("抓取紀錄失敗", e); }
-        }
+async function gasCall(action, payload = {}) {
+  // GAS doGet 用 URLSearchParams，所有值轉成字串
+  const params = new URLSearchParams({ action });
+  for (const [k, v] of Object.entries(payload)) {
+    params.set(k, v === null || v === undefined ? '' : String(v));
+  }
+  const res = await fetch(GAS_URL + '?' + params.toString());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
 
-        async function submitData() {
-            const saveBtn = document.getElementById('save-btn');
-            const customer = document.getElementById('customer').value.trim();
-            const link = document.getElementById('link').value.trim();
-            const media = document.getElementById('media-select').value;
-            const recorder = document.getElementById('recorder-select').value;
+// ════════════════════════════════════
+// AUTH
+// ════════════════════════════════════
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!id || !pw) { showLoginError('請輸入帳號與密碼'); return; }
 
-            if (!customer || !link) { alert("請填寫客戶名稱與連結"); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  document.getElementById('login-btn-txt').innerHTML = '<span class="spinner"></span> 驗證中';
 
-            saveBtn.disabled = true;
-            saveBtn.innerText = "正在儲存...";
+  try {
+    const r = await gasCall('login', { id, password: pw });
+    if (r.success) {
+      currentUser = { id: r.userId, name: r.displayName };
+      hideLoginError();
+      await initApp();
+      showPage('app');
+    } else {
+      showLoginError(r.message || '帳號或密碼錯誤');
+    }
+  } catch(e) {
+    showLoginError('連線失敗，請稍後再試');
+  }
 
-            try {
-                const payload = {
-                    action: "saveRecord",
-                    recorder: recorder,
-                    customer: customer,
-                    media: media,
-                    link: link
-                };
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-                const result = await res.json();
+  btn.disabled = false;
+  document.getElementById('login-btn-txt').textContent = '登入';
+}
 
-                if (result.success) {
-                    alert("✅ 紀錄已儲存");
-                    document.getElementById('customer').value = "";
-                    document.getElementById('link').value = "";
-                    await fetchUserRecords();
-                }
-            } catch (e) {
-                alert("❌ 儲存失敗");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerText = "儲存紀錄";
-            }
-        }
-    </script>
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideLoginError() {
+  document.getElementById('login-error').classList.remove('show');
+}
+
+function doLogout() {
+  currentUser = null;
+  showPage('login');
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+}
+
+document.getElementById('login-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ════════════════════════════════════
+// PAGE / TAB CONTROL
+// ════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'my') loadMyLinks();
+  if (name === 'all') loadAllLinks();
+}
+
+// ════════════════════════════════════
+// INIT APP
+// ════════════════════════════════════
+async function initApp() {
+  // Set user info
+  document.getElementById('user-display').textContent = currentUser.name;
+  document.getElementById('user-avatar').textContent = currentUser.name.charAt(0);
+
+  showLoading('載入資料⋯');
+  try {
+    const r = await gasCall('getMeta');
+    allUsers = r.users || [];
+    allMedia = r.media || [];
+    populateUserDropdowns();
+    populateMediaDropdowns();
+    // Pre-select current user in add form
+    const recEl = document.getElementById('rec-recorder');
+    for (let opt of recEl.options) {
+      if (opt.value === currentUser.id) { recEl.value = currentUser.id; break; }
+    }
+  } catch(e) {
+    toast('載入基礎資料失敗', 'error');
+  }
+  hideLoading();
+}
+
+function populateUserDropdowns() {
+  const selectors = ['#rec-recorder', '#all-filter-recorder'];
+  selectors.forEach(sel => {
+    const el = document.querySelector(sel);
+    const base = sel.includes('filter') ? '<option value="">全部人員</option>' : '<option value="">— 選擇人員 —</option>';
+    el.innerHTML = base + allUsers.map(u => `<option value="${escHtml(u.id)}">${escHtml(u.name)}</option>`).join('');
+  });
+}
+
+function populateMediaDropdowns() {
+  const selectors = ['#rec-media', '#my-filter-media', '#all-filter-media'];
+  selectors.forEach(sel => {
+    const el = document.querySelector(sel);
+    const isFilter = sel.includes('filter');
+    const base = isFilter ? '<option value="">全部媒體</option>' : '<option value="">— 選擇媒體 —</option>';
+    el.innerHTML = base + allMedia.map(m => `<option value="${escHtml(m)}">${escHtml(m)}</option>`).join('');
+  });
+}
+
+// ════════════════════════════════════
+// SUBMIT RECORD
+// ════════════════════════════════════
+async function submitRecord() {
+  const recorder = document.getElementById('rec-recorder').value;
+  const media    = document.getElementById('rec-media').value;
+  const url      = document.getElementById('rec-url').value.trim();
+  const likes    = parseInt(document.getElementById('rec-likes').value) || 0;
+  const shares   = parseInt(document.getElementById('rec-shares').value) || 0;
+  const comments = parseInt(document.getElementById('rec-comments').value) || 0;
+  const note     = document.getElementById('rec-note').value.trim();
+
+  if (!recorder) { toast('請選擇紀錄人員', 'error'); return; }
+  if (!media)    { toast('請選擇媒體名稱', 'error'); return; }
+  if (!url)      { toast('請輸入分享連結', 'error'); return; }
+
+  showLoading('儲存中⋯');
+  try {
+    const r = await gasCall('addRecord', {
+      recorderId: recorder,
+      media, url, likes, shares, comments, note,
+      submittedBy: currentUser.id
+    });
+    if (r.success) {
+      toast('連結已成功儲存！', 'success');
+      // Reset form
+      document.getElementById('rec-url').value = '';
+      document.getElementById('rec-likes').value = '0';
+      document.getElementById('rec-shares').value = '0';
+      document.getElementById('rec-comments').value = '0';
+      document.getElementById('rec-note').value = '';
+    } else {
+      toast(r.message || '儲存失敗', 'error');
+    }
+  } catch(e) {
+    toast('儲存失敗，請稍後再試', 'error');
+  }
+  hideLoading();
+}
+
+// ════════════════════════════════════
+// LOAD MY LINKS
+// ════════════════════════════════════
+async function loadMyLinks(page = 1) {
+  myPage = page;
+  const media = document.getElementById('my-filter-media').value;
+  showLoading('載入我的連結⋯');
+  try {
+    const r = await gasCall('getLinks', { recorderId: currentUser.id, media });
+    myLinksData = r.records || [];
+    renderTable('my', myLinksData);
+  } catch(e) {
+    toast('載入失敗', 'error');
+  }
+  hideLoading();
+}
+
+// ════════════════════════════════════
+// LOAD ALL LINKS
+// ════════════════════════════════════
+async function loadAllLinks(page = 1) {
+  allPage = page;
+  const recorder = document.getElementById('all-filter-recorder').value;
+  const media    = document.getElementById('all-filter-media').value;
+  showLoading('載入所有連結⋯');
+  try {
+    const r = await gasCall('getLinks', { recorderId: recorder, media });
+    allLinksData = r.records || [];
+    renderTable('all', allLinksData);
+  } catch(e) {
+    toast('載入失敗', 'error');
+  }
+  hideLoading();
+}
+
+// ════════════════════════════════════
+// RENDER TABLE
+// ════════════════════════════════════
+function renderTable(scope, data) {
+  const wrap = document.getElementById(scope + '-table-wrap');
+  const pagEl = document.getElementById(scope + '-pagination');
+  const page = scope === 'my' ? myPage : allPage;
+
+  if (!data.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>尚無連結紀錄</p></div>`;
+    pagEl.innerHTML = '';
+    return;
+  }
+
+  const total = data.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const start = (page - 1) * PAGE_SIZE;
+  const slice = data.slice(start, start + PAGE_SIZE);
+
+  wrap.innerHTML = `
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>紀錄人員</th>
+          <th>媒體</th>
+          <th>分享連結</th>
+          <th>👍 讚</th>
+          <th>🔁 分享</th>
+          <th>💬 留言</th>
+          <th>日期</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${slice.map(row => `
+          <tr>
+            <td>${escHtml(row.recorderName || row.recorderId)}</td>
+            <td><span class="tag tag-media">${escHtml(row.media)}</span></td>
+            <td class="link-cell"><a href="${escHtml(row.url)}" target="_blank" rel="noopener">${escHtml(row.url)}</a></td>
+            <td style="font-family:'DM Mono',monospace;font-size:12px">${row.likes ?? 0}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:12px">${row.shares ?? 0}</td>
+            <td style="font-family:'DM Mono',monospace;font-size:12px">${row.comments ?? 0}</td>
+            <td style="color:var(--text2);font-size:12px">${escHtml(row.date || '')}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    </div>`;
+
+  // Pagination
+  if (pages <= 1) { pagEl.innerHTML = ''; return; }
+
+  let btns = '';
+  for (let i = 1; i <= pages; i++) {
+    btns += `<button class="page-btn ${i === page ? 'active' : ''}" onclick="renderTable('${scope}',${scope === 'my' ? 'myLinksData' : 'allLinksData'});${scope}Page=${i};renderTable('${scope}',${scope==='my'?'myLinksData':'allLinksData'})">${i}</button>`;
+  }
+
+  pagEl.innerHTML = `
+    <span>${total} 筆記錄，第 ${page}/${pages} 頁</span>
+    <div class="pages">${btns}</div>`;
+
+  // Fix onclick to use correct data ref
+  pagEl.querySelectorAll('.page-btn').forEach((btn, idx) => {
+    btn.onclick = () => {
+      if (scope === 'my') { myPage = idx + 1; renderTable('my', myLinksData); }
+      else { allPage = idx + 1; renderTable('all', allLinksData); }
+    };
+  });
+}
+
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
 </body>
 </html>
