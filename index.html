@@ -93,41 +93,32 @@
         let userName = "";
 
         // 登入函式
-        async function handleLogin() {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            if (!user || !pass) { alert("請填寫帳號與密碼"); return; }
+async function handleLogin() {
+    const userField = document.getElementById('username');
+    const passField = document.getElementById('password');
+    
+    const payload = {
+        action: "login",
+        username: userField.value.trim(), // 確保欄位名稱是 username
+        password: passField.value.trim()
+    };
 
-            const loginBtn = document.getElementById('login-btn');
-            loginBtn.disabled = true;
-            loginBtn.innerText = "驗證中...";
-
-            try {
-                const response = await fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "login", username: user, password: pass })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    userName = result.displayName;
-                    document.getElementById('display-user').innerText = userName;
-                    document.getElementById('login-section').classList.add('hidden');
-                    document.getElementById('main-section').classList.remove('hidden');
-                    await initApp();
-                } else {
-                    alert(result.msg || "登入失敗");
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "登入系統";
-                }
-            } catch (error) {
-                console.error(error);
-                alert("伺服器連線失敗");
-                loginBtn.disabled = false;
-                loginBtn.innerText = "登入系統";
-            }
+    try {
+        const res = await fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+            // 登入成功邏輯...
+        } else {
+            alert(result.msg); // 這裏就會跳出你看到的「權限不足」
         }
-
+    } catch (e) {
+        alert("連線失敗");
+    }
+}
         async function initApp() {
             try {
                 const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
