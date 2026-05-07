@@ -136,17 +136,28 @@ async function initApp() {
         const res = await fetch(GAS_URL, { 
             method: "POST", 
             body: JSON.stringify({ action: "getFormData" }),
-            redirect: "follow" // 必須加這行
+            redirect: "follow" // 強制跟隨重定向
         });
-        const data = await res.json();
         
+        // --- 強制偵錯開始 ---
+        const rawText = await res.text(); // 先讀取原始文字
+        console.log("後端回傳原始內容:", rawText);
+        
+        let data;
+        try {
+            data = JSON.parse(rawText); // 手動解析 JSON
+        } catch (e) {
+            console.error("後端回傳的不是 JSON，可能是 HTML 錯誤頁面");
+            return;
+        }
+        // --- 強制偵錯結束 ---
+
         const rSelect = document.getElementById('recorder-select');
         const mSelect = document.getElementById('media-select');
         
         rSelect.innerHTML = '<option value="" disabled>選擇人員</option>';
         mSelect.innerHTML = '<option value="" disabled>選擇媒體</option>';
 
-        // 加上安全檢查，避免 data.userList 是 undefined
         if (data.userList && Array.isArray(data.userList)) {
             data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
             rSelect.value = userName;
