@@ -96,29 +96,67 @@
 async function handleLogin() {
     const userField = document.getElementById('username');
     const passField = document.getElementById('password');
-    
-    const payload = {
-        action: "login",
-        username: userField.value.trim(), // 確保欄位名稱是 username
-        password: passField.value.trim()
-    };
+    const loginBtn = document.getElementById('login-btn');
+
+    const username = userField.value.trim();
+    const password = passField.value.trim();
+
+    if (!username || !password) {
+        alert("請輸入帳號與密碼");
+        return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.innerText = "驗證中...";
 
     try {
+        const payload = {
+            action: "login",
+            username: username,
+            password: password
+        };
+
+        // --- 這是你要替換/貼上的關鍵 fetch 段落 ---
         const res = await fetch(GAS_URL, {
             method: "POST",
+            mode: "no-cors", // 這是關鍵：避免預檢請求被攔截
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
             body: JSON.stringify(payload)
         });
-        const result = await res.json();
+
+        // 注意：因為 mode 是 no-cors，我們無法在這邊直接讀取 result.json()
+        // 為了讓系統能跑通，建議將 mode 改回預設並修正後端 CORS
+        // 下面是針對 Google Apps Script 最穩定的寫法：
         
+        const response = await fetch(GAS_URL, {
+            method: "POST",
+            body: JSON.stringify(payload),
+            redirect: "follow" // 強制跟隨 302 重定向
+        });
+        
+        const result = await response.json();
+        // --- 關鍵段落結束 ---
+
         if (result.success) {
-            // 登入成功邏輯...
+            userName = result.displayName;
+            document.getElementById('display-user').innerText = userName;
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('main-section').classList.remove('hidden');
+            await initApp();
         } else {
-            alert(result.msg); // 這裏就會跳出你看到的「權限不足」
+            alert(result.msg || "帳號或密碼錯誤");
         }
     } catch (e) {
-        alert("連線失敗");
+        console.error("Login Error:", e);
+        alert("連線失敗，請檢查 GAS 網址是否正確");
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = "登入系統";
     }
 }
+
         async function initApp() {
             try {
                 const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
@@ -179,8 +217,12 @@ async function handleLogin() {
                     media: media,
                     link: link
                 };
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
-                const result = await res.json();
+                const res = await fetch(GAS_URL, { 
+						method: "POST", 
+						body: JSON.stringify(payload),
+						redirect: "follow" // 確保儲存時也能正確重定向
+				});
+						const result = await res.json();
 
                 if (result.success) {
                     alert("✅ 紀錄已儲存");
