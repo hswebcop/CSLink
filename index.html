@@ -158,23 +158,45 @@ async function handleLogin() {
 }
 
         async function initApp() {
-            try {
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getFormData" }) });
-                const data = await res.json();
-                
-                const rSelect = document.getElementById('recorder-select');
-                const mSelect = document.getElementById('media-select');
-                
-                rSelect.innerHTML = "";
-                mSelect.innerHTML = "";
+    try {
+        const res = await fetch(GAS_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "getFormData" }) 
+        });
+        const data = await res.json();
+        
+        // 【除錯關鍵】在控制台印出結果，看看結構是否對齊
+        console.log("後端回傳的原始資料:", data);
 
-                data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
-                rSelect.value = userName;
-                data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
-                
-                await fetchUserRecords();
-            } catch (e) { console.error("初始化資料失敗", e); }
+        const rSelect = document.getElementById('recorder-select');
+        const mSelect = document.getElementById('media-select');
+        
+        // 清空選單並加入預設選項
+        rSelect.innerHTML = '<option value="" disabled>選擇人員</option>';
+        mSelect.innerHTML = '<option value="" disabled>選擇媒體</option>';
+
+        // 【防呆檢查 1】確認 userList 存在且是陣列
+        if (data.userList && Array.isArray(data.userList)) {
+            data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
+            rSelect.value = userName;
+        } else {
+            console.error("無法載入人員清單，請檢查後端 Users 分頁");
         }
+
+        // 【防呆檢查 2】確認 mediaList 存在且是陣列
+        if (data.mediaList && Array.isArray(data.mediaList)) {
+            data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
+        } else {
+            console.error("無法載入媒體清單，請檢查後端 媒體清單 分頁");
+        }
+        
+        // 無論下拉選單是否成功，都嘗試抓取下方歷史紀錄
+        await fetchUserRecords();
+
+    } catch (e) { 
+        console.error("初始化資料執行失敗，錯誤訊息:", e); 
+    }
+}
 
         async function fetchUserRecords() {
             try {
