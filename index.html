@@ -90,175 +90,145 @@
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzAaz6A12J7kKGYfR9mNIciFOSm4rtEBfF_1o0KAzUB26bRr_Ry7MGthU8_dYqMvTgV6g/exec"; 
-        let userName = "";
+let userName = "";
 
-        // 登入函式
 async function handleLogin() {
     const userField = document.getElementById('username');
     const passField = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
-
     const username = userField.value.trim();
     const password = passField.value.trim();
 
-    if (!username || !password) {
-        alert("請輸入帳號與密碼");
-        return;
-    }
+    if (!username || !password) { alert("請輸入帳號與密碼"); return; }
 
     loginBtn.disabled = true;
     loginBtn.innerText = "驗證中...";
 
     try {
-        const payload = {
-            action: "login",
-            username: username,
-            password: password
-        };
-
-        // --- 這是你要替換/貼上的關鍵 fetch 段落 ---
-        const res = await fetch(GAS_URL, {
-            method: "POST",
-            mode: "no-cors", // 這是關鍵：避免預檢請求被攔截
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        // 注意：因為 mode 是 no-cors，我們無法在這邊直接讀取 result.json()
-        // 為了讓系統能跑通，建議將 mode 改回預設並修正後端 CORS
-        // 下面是針對 Google Apps Script 最穩定的寫法：
-        
+        const payload = { action: "login", username: username, password: password };
+        // 統一使用跟隨重定向的寫法
         const response = await fetch(GAS_URL, {
             method: "POST",
             body: JSON.stringify(payload),
-            redirect: "follow" // 強制跟隨 302 重定向
+            redirect: "follow" 
         });
-        
         const result = await response.json();
-        // --- 關鍵段落結束 ---
 
         if (result.success) {
             userName = result.displayName;
             document.getElementById('display-user').innerText = userName;
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('main-section').classList.remove('hidden');
-            await initApp();
+            await initApp(); // 登入成功後初始化介面
         } else {
             alert(result.msg || "帳號或密碼錯誤");
         }
     } catch (e) {
-        console.error("Login Error:", e);
-        alert("連線失敗，請檢查 GAS 網址是否正確");
+        alert("連線失敗，請檢查網路");
     } finally {
         loginBtn.disabled = false;
         loginBtn.innerText = "登入系統";
     }
 }
 
-        async function initApp() {
+async function initApp() {
     try {
         const res = await fetch(GAS_URL, { 
             method: "POST", 
-            body: JSON.stringify({ action: "getFormData" }) 
+            body: JSON.stringify({ action: "getFormData" }),
+            redirect: "follow" // 必須加這行
         });
         const data = await res.json();
         
-        // 【除錯關鍵】在控制台印出結果，看看結構是否對齊
-        console.log("後端回傳的原始資料:", data);
-
         const rSelect = document.getElementById('recorder-select');
         const mSelect = document.getElementById('media-select');
         
-        // 清空選單並加入預設選項
         rSelect.innerHTML = '<option value="" disabled>選擇人員</option>';
         mSelect.innerHTML = '<option value="" disabled>選擇媒體</option>';
 
-        // 【防呆檢查 1】確認 userList 存在且是陣列
+        // 加上安全檢查，避免 data.userList 是 undefined
         if (data.userList && Array.isArray(data.userList)) {
             data.userList.forEach(u => { rSelect.add(new Option(u, u)); });
             rSelect.value = userName;
-        } else {
-            console.error("無法載入人員清單，請檢查後端 Users 分頁");
         }
 
-        // 【防呆檢查 2】確認 mediaList 存在且是陣列
         if (data.mediaList && Array.isArray(data.mediaList)) {
             data.mediaList.forEach(m => { mSelect.add(new Option(m, m)); });
-        } else {
-            console.error("無法載入媒體清單，請檢查後端 媒體清單 分頁");
         }
         
-        // 無論下拉選單是否成功，都嘗試抓取下方歷史紀錄
         await fetchUserRecords();
-
     } catch (e) { 
-        console.error("初始化資料執行失敗，錯誤訊息:", e); 
+        console.error("初始化資料失敗", e); 
     }
 }
 
-        async function fetchUserRecords() {
-            try {
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "getUserRecords", userName: userName }) });
-                const data = await res.json();
-                const tbody = document.getElementById('record-table-body');
-                
-                if (data.records && data.records.length > 0) {
-                    tbody.innerHTML = data.records.map(r => `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-3 text-sm whitespace-nowrap">${r.date}</td>
-                            <td class="p-3 text-sm font-medium">${r.customer}</td>
-                            <td class="p-3 text-sm text-gray-500">${r.media}</td>
-                            <td class="p-3 text-sm"><a href="${r.link}" target="_blank" class="text-indigo-600 font-bold">查看</a></td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">尚無歷史紀錄</td></tr>';
-                }
-            } catch (e) { console.error("抓取紀錄失敗", e); }
+async function fetchUserRecords() {
+    try {
+        const res = await fetch(GAS_URL, { 
+            method: "POST", 
+            body: JSON.stringify({ action: "getUserRecords", userName: userName }),
+            redirect: "follow" // 必須加這行
+        });
+        const data = await res.json();
+        const tbody = document.getElementById('record-table-body');
+        
+        if (data.records && data.records.length > 0) {
+            tbody.innerHTML = data.records.map(r => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 text-sm whitespace-nowrap">${r.date}</td>
+                    <td class="p-3 text-sm font-medium">${r.customer}</td>
+                    <td class="p-3 text-sm text-gray-500">${r.media}</td>
+                    <td class="p-3 text-sm"><a href="${r.link}" target="_blank" class="text-indigo-600 font-bold">查看</a></td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-400">尚無歷史紀錄</td></tr>';
         }
+    } catch (e) { 
+        console.error("抓取紀錄失敗", e); 
+    }
+}
 
-        async function submitData() {
-            const saveBtn = document.getElementById('save-btn');
-            const customer = document.getElementById('customer').value.trim();
-            const link = document.getElementById('link').value.trim();
-            const media = document.getElementById('media-select').value;
-            const recorder = document.getElementById('recorder-select').value;
+async function submitData() {
+    const saveBtn = document.getElementById('save-btn');
+    const customer = document.getElementById('customer').value.trim();
+    const link = document.getElementById('link').value.trim();
+    const media = document.getElementById('media-select').value;
+    const recorder = document.getElementById('recorder-select').value;
 
-            if (!customer || !link) { alert("請填寫客戶名稱與連結"); return; }
+    if (!customer || !link) { alert("請填寫客戶名稱與連結"); return; }
 
-            saveBtn.disabled = true;
-            saveBtn.innerText = "正在儲存...";
+    saveBtn.disabled = true;
+    saveBtn.innerText = "正在儲存...";
 
-            try {
-                const payload = {
-                    action: "saveRecord",
-                    recorder: recorder,
-                    customer: customer,
-                    media: media,
-                    link: link
-                };
-                const res = await fetch(GAS_URL, { 
-						method: "POST", 
-						body: JSON.stringify(payload),
-						redirect: "follow" // 確保儲存時也能正確重定向
-				});
-						const result = await res.json();
+    try {
+        const payload = {
+            action: "saveRecord",
+            recorder: recorder,
+            customer: customer,
+            media: media,
+            link: link
+        };
+        const res = await fetch(GAS_URL, { 
+            method: "POST", 
+            body: JSON.stringify(payload),
+            redirect: "follow" 
+        });
+        const result = await res.json();
 
-                if (result.success) {
-                    alert("✅ 紀錄已儲存");
-                    document.getElementById('customer').value = "";
-                    document.getElementById('link').value = "";
-                    await fetchUserRecords();
-                }
-            } catch (e) {
-                alert("❌ 儲存失敗");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerText = "儲存紀錄";
-            }
+        if (result.success) {
+            alert("✅ 紀錄已儲存");
+            document.getElementById('customer').value = "";
+            document.getElementById('link').value = "";
+            await fetchUserRecords();
         }
+    } catch (e) {
+        alert("❌ 儲存失敗");
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "儲存紀錄";
+    }
+}
     </script>
 </body>
 </html>
